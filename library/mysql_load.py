@@ -81,9 +81,8 @@ class Mysql:
         Gets data from mysql as a pandas dataframe by running a query
         """
         try:
-            cnx = self.get_mysql_connection()
+            cnx = self.get_mysql_alchemy_engine()
             df = pd.read_sql(query, cnx)
-            cnx.close()
             return df
         except:
             return "FAILED"        
