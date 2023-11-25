@@ -93,15 +93,16 @@ class Mysql:
         Gets channel details from mongodb and loads into mysql as bulk
         """
         
-        drop_channel_query =  connection["create_table_query"]   
+        drop_channel_query =  connection["drop_table_query"]   
         create_channel_query = connection["create_table_query"]
+        table_name = connection["table_name"]
 
         op = self.execute_mysql_query(drop_channel_query)
         op = self.execute_mysql_query(create_channel_query)
 
         try:
             eng = self.get_mysql_alchemy_engine()
-            op = connection["df"].to_sql(name='channels', con=eng,if_exists='append',index=False)
+            op = connection["df"].to_sql(name=table_name, con=eng,if_exists='append',index=False)
             print(op)
         except Exception as ex:
             return "FAILED" + str(ex)
