@@ -1,5 +1,6 @@
 pandas
 streamlit
+streamlit-option-menu
 mysqlclient
 mysql-connector
 mysql-connector-python
