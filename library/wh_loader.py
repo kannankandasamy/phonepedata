@@ -4,6 +4,18 @@ class WHLoader:
     def __init__(self):
         pass
 
+    def load_states_to_wh(self, mys, df):
+        drop_table_query = "drop table if exists states"
+        create_table_query = """
+            create table if not exists states(
+                map_state varchar(100),
+                existing_state varchar(100)
+                )
+            """
+        op = mys.load_data_to_mysql_alchemy(df = df, drop_table_query=drop_table_query, create_table_query=create_table_query, table_name="states")
+        #print(df.size)        
+        return op    
+
     def load_agg_trans_to_wh(self, mys, df):
         drop_table_query = "drop table if exists agg_trans"
         create_table_query = """

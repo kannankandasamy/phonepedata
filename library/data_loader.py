@@ -6,6 +6,11 @@ class DataLoader:
     def __init__(self):
         pass
 
+    def get_correct_states(self):
+        #df = pd.read_csv("https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/active_cases_2020-07-17_0800.csv")
+        df=pd.read_csv("C:/kannan/code/phonepedata/data/states/map_state.csv")
+        return df
+
     def get_agg_trans(self):
         aggpath = "C:/kannan/code/phonepedata/data/aggregated/transaction/country/india/state/"
         agg_tran_list = os.listdir(aggpath)

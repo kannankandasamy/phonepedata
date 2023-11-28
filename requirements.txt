@@ -5,3 +5,5 @@ mysqlclient
 mysql-connector
 mysql-connector-python
 sqlalchemy
+plotly
+matplotlib
