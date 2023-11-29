@@ -162,3 +162,19 @@ class PhonepeAnalytics:
 
                 fig1 = px.pie(pl_df, values="transaction_count", names="brands", title="Users by Brands")
                 st.plotly_chart(fig1)                
+            elif question_selected.startswith("4."):
+                st.write("Map Transactions by districts")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                query = """select districts, sum(transaction_count) as transaction_count,  round(sum(transaction_amount), 2) as transaction_amount
+                                from vw_map_trans
+                                where map_state in ('{state_selected}')
+                                group by districts
+                                order by districts;"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)     
+
+                fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts")
+                st.plotly_chart(fig)
