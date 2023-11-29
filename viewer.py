@@ -168,13 +168,62 @@ class PhonepeAnalytics:
                 state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
                 #sts_selected="','".join(i for i in state_selected)  
 
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)                
+
                 query = """select districts, sum(transaction_count) as transaction_count,  round(sum(transaction_amount), 2) as transaction_amount
                                 from vw_map_trans
                                 where map_state in ('{state_selected}')
+                                and years in ('{yr_selected}')
                                 group by districts
                                 order by districts;"""
-                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)     
 
                 fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts")
                 st.plotly_chart(fig)
+
+            elif question_selected.startswith("5."):
+                st.write("Map Users by districts")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)                
+
+                query = """select districts, sum(registered_users) as registered_users,  sum(app_opens) as app_opens
+                                from vw_map_users
+                                where map_state in ('{state_selected}')
+                                and years in ('{yr_selected}')
+                                group by districts
+                                order by districts;"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)     
+
+                fig = px.bar(pl_df, x="districts", y="registered_users", color="districts")
+                st.plotly_chart(fig)
+
+            elif question_selected.startswith("6."):
+                st.write("Map Transactions and Users by districts")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)                
+
+                query = """select mu.districts, sum(mu.registered_users) as registered_users,  sum(mu.app_opens) as app_opens
+                                    , sum(mt.transaction_count) as transaction_count, sum(mt.transaction_amount) as transaction_amount
+                                from vw_map_users mu
+                                join vw_map_trans mt
+                                on mu.states = mt.states
+                                and mu.years = mt.years
+                                and mu.quarters = mt.quarters
+                                and mu.districts = mt.districts
+                                where mu.map_state in ('{state_selected}')
+                                and mu.years in ('{yr_selected}')
+                                group by mu.districts
+                                order by mu.districts;"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    

@@ -142,9 +142,9 @@ use phonepe_data;
 select * from questions;
 #delete from questions where question_id = 3;
 
-insert into questions values (4, '4. Map Transactions');
+insert into questions values (6, '6. Map Transactions and Users');
 
-select * from vw_map_trans;
+select * from vw_map_users;
 
 
 select s.map_state, a.* from agg_users a
