@@ -144,8 +144,55 @@ select * from questions;
 
 insert into questions values (6, '6. Map Transactions and Users');
 
-select * from vw_map_users;
+select * from vw_agg_trans;
 
+select distinct years from vw_agg_trans;
+
+select * from questions;
+
+delete from questions where question_name = '6. Aggregated Transactions by Years';
+
+insert into questions values (8, '8. Registered Users by Years');
+
+with cte as (
+	select map_state, years, transaction_name, sum(transaction_count) as transaction_count from vw_agg_trans
+	group by map_state, years, transaction_name
+)
+select 
+	map_state,
+    transaction_name,
+    sum(case years when '2018' then transaction_count end) as '2018',
+    sum(case years when '2019' then transaction_count end) as '2019', 
+    sum(case years when '2020' then transaction_count end) as '2020',
+    sum(case years when '2021' then transaction_count end) as '2021',
+    sum(case years when '2022' then transaction_count end) as '2022',
+    sum(case years when '2023' then transaction_count end) as '2023'
+ from cte
+ group by 
+ 	map_state,
+    transaction_name;
+    
+select * from vw_top_users;
+    
+with cte as (
+	select map_state, years, districts, sum(registered_users) as registered_users from vw_top_users
+	group by map_state, years, districts
+)
+select 
+	map_state,
+    districts,
+    sum(case years when '2018' then registered_users end) as '2018',
+    sum(case years when '2019' then registered_users end) as '2019', 
+    sum(case years when '2020' then registered_users end) as '2020',
+    sum(case years when '2021' then registered_users end) as '2021',
+    sum(case years when '2022' then registered_users end) as '2022',
+    sum(case years when '2023' then registered_users end) as '2023'
+ from cte
+ group by 
+ 	map_state,
+    districts;    
+
+select * from vw_top_users;
 
 select s.map_state, a.* from agg_users a
     left join states s

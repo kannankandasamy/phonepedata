@@ -111,7 +111,7 @@ class PhonepeAnalytics:
 
                 st.write("In chart")
                 #fig1, ax1 = plt.subplots()
-                fig1 = px.pie(pl_df, values="transaction_amount", names="transaction_name", title="Transactions by types")
+                fig1 = px.pie(pl_df, values="transaction_count", names="transaction_name", title="Transactions by types")
                 #ax1.pie(pl_df["transaction_amount"], labels=pl_df["transaction_name"])
                 #ax1.axis("equal")
                 st.plotly_chart(fig1)
@@ -227,3 +227,98 @@ class PhonepeAnalytics:
                                 order by mu.districts;"""
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+            elif question_selected.startswith("7."):
+                st.write("Aggregated Transactions by Years")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                query = """with cte as (
+                                select map_state, years, transaction_name, sum(transaction_count) as transaction_count from vw_agg_trans
+                                where map_state in ('{state_selected}')
+                                group by map_state, years, transaction_name
+                            )
+                            select 
+                                transaction_name,
+                                sum(case years when '2018' then transaction_count end) as '2018',
+                                sum(case years when '2019' then transaction_count end) as '2019', 
+                                sum(case years when '2020' then transaction_count end) as '2020',
+                                sum(case years when '2021' then transaction_count end) as '2021',
+                                sum(case years when '2022' then transaction_count end) as '2022',
+                                sum(case years when '2023' then transaction_count end) as '2023'
+                            from cte
+                            group by 
+                                transaction_name"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                query = """select map_state, years, transaction_name, sum(transaction_count) as transaction_count from vw_agg_trans
+                            where map_state in ('{state_selected}')
+                            group by map_state, years, transaction_name""" 
+                df1 = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                fig = px.line(df1, x="years", y="transaction_count", color="transaction_name",markers=True)
+                st.plotly_chart(fig)           
+
+            elif question_selected.startswith("8."):
+                st.write("Registered Users by Years")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                query = """with cte as (
+                                select map_state, years, districts, sum(registered_users) as registered_users from vw_top_users
+                                where map_state in ('{state_selected}')
+                                group by map_state, years, districts
+                            )
+                            select 
+                                districts,
+                                coalesce(sum(case years when '2018' then registered_users end),0) as '2018',
+                                coalesce(sum(case years when '2019' then registered_users end),0) as '2019', 
+                                coalesce(sum(case years when '2020' then registered_users end),0) as '2020',
+                                coalesce(sum(case years when '2021' then registered_users end),0) as '2021',
+                                coalesce(sum(case years when '2022' then registered_users end),0) as '2022',
+                                coalesce(sum(case years when '2023' then registered_users end),0) as '2023'
+                            from cte
+                            group by 
+                                districts;"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                query = """select map_state, years, districts, sum(registered_users) as registered_users from vw_top_users
+                            where map_state in ('{state_selected}')
+                            group by map_state, years, districts""" 
+                df1 = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                fig = px.line(df1, x="years", y="registered_users", color="districts",markers=True)
+                st.plotly_chart(fig)                                
+
+            elif question_selected.startswith("9."):
+                st.write("Transactions by Years on brands")          
+
+                state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
+                #sts_selected="','".join(i for i in state_selected)  
+
+                query = """with cte as (
+                                select map_state, years, brands, sum(transaction_count) as transaction_count from vw_agg_users
+                                where map_state in ('{state_selected}')
+                                group by map_state, years, brands
+                            )
+                            select 
+                                brands,
+                                sum(case years when '2018' then transaction_count end) as '2018',
+                                sum(case years when '2019' then transaction_count end) as '2019', 
+                                sum(case years when '2020' then transaction_count end) as '2020',
+                                sum(case years when '2021' then transaction_count end) as '2021',
+                                sum(case years when '2022' then transaction_count end) as '2022',
+                                sum(case years when '2023' then transaction_count end) as '2023'
+                            from cte
+                            group by 
+                                brands;"""
+                pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                query = """select map_state, years, brands, sum(transaction_count) as transaction_count from vw_agg_users
+                            where map_state in ('{state_selected}')
+                            group by map_state, years, brands""" 
+                df1 = mys.get_data_from_mysql(query.format(state_selected=state_selected))
+                fig = px.line(df1, x="years", y="transaction_count", color="brands",markers=True)
+                st.plotly_chart(fig)           
