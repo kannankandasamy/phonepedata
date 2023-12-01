@@ -92,7 +92,7 @@ class PhonepeAnalytics:
             trans_df = mys.get_data_from_mysql(query)     
 
             if question_selected.startswith("1."):
-                st.write("Aggregated Transactions by transaction name")
+                st.write("Transactions by transaction name")
 
                 year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
                 yr_selected="','".join(i for i in year_selected)
@@ -106,14 +106,9 @@ class PhonepeAnalytics:
                                 and map_state in ('{sts_selected}')
                                 group by transaction_name;"""
                 pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))
-                #pl_df = mys.get_data_from_mysql(query)
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)    
 
-                st.write("In chart")
-                #fig1, ax1 = plt.subplots()
                 fig1 = px.pie(pl_df, values="transaction_count", names="transaction_name", title="Transactions by types")
-                #ax1.pie(pl_df["transaction_amount"], labels=pl_df["transaction_name"])
-                #ax1.axis("equal")
                 st.plotly_chart(fig1)
 
             elif question_selected.startswith("2."):
@@ -133,7 +128,7 @@ class PhonepeAnalytics:
                                 and transaction_name in ('{trans_selected}')
                                 group by s.map_state;"""
                 pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,trans_selected=tr_selected))
-                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=600)                        
+                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
 
                 fig = px.choropleth(
                     pl_df,
@@ -147,7 +142,7 @@ class PhonepeAnalytics:
 
                 st.plotly_chart(fig)       
             elif question_selected.startswith("3."):
-                st.write("Aggregated Users by Brands")          
+                st.write("Usage Percentge by Brands")          
 
                 year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
                 yr_selected="','".join(i for i in year_selected)
@@ -158,12 +153,12 @@ class PhonepeAnalytics:
                                 group by brands
                                 order by transaction_count desc;"""
                 pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
-                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=600) 
+                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400) 
 
                 fig1 = px.pie(pl_df, values="transaction_count", names="brands", title="Users by Brands")
                 st.plotly_chart(fig1)                
             elif question_selected.startswith("4."):
-                st.write("Map Transactions by districts")          
+                st.write("Transactions by districts")          
 
                 state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
                 #sts_selected="','".join(i for i in state_selected)  
@@ -180,11 +175,11 @@ class PhonepeAnalytics:
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)     
 
-                fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts")
+                fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts", title="In chart")
                 st.plotly_chart(fig)
 
             elif question_selected.startswith("5."):
-                st.write("Map Users by districts")          
+                st.write("Registered Users by districts")          
 
                 state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
                 #sts_selected="','".join(i for i in state_selected)  
@@ -201,11 +196,11 @@ class PhonepeAnalytics:
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)     
 
-                fig = px.bar(pl_df, x="districts", y="registered_users", color="districts")
+                fig = px.bar(pl_df, x="districts", y="registered_users", color="districts", title="In chart")
                 st.plotly_chart(fig)
 
             elif question_selected.startswith("6."):
-                st.write("Map Transactions and Users by districts")          
+                st.write("Transactions and Users by districts")          
 
                 state_selected = st.sidebar.selectbox("Select States", options = states_df['states'])      
                 #sts_selected="','".join(i for i in state_selected)  
@@ -227,6 +222,10 @@ class PhonepeAnalytics:
                                 order by mu.districts;"""
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                fig = px.bar(pl_df, x="districts", y=["app_opens", "transaction_count"], title="Users and Transactions")
+                st.plotly_chart(fig)
+
             elif question_selected.startswith("7."):
                 st.write("Aggregated Transactions by Years")          
 
