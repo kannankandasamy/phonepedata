@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 import plotly.express as px
 import matplotlib.pyplot as plt
 import requests
+from PIL import Image
 
 from utils.config import *
 from library.mysql_load import *
