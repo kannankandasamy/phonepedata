@@ -156,7 +156,8 @@ class PhonepeAnalytics:
                 st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400) 
 
                 fig1 = px.pie(pl_df, values="transaction_count", names="brands", title="Users by Brands")
-                st.plotly_chart(fig1)                
+                st.plotly_chart(fig1)       
+
             elif question_selected.startswith("4."):
                 st.write("Transactions by districts")          
 
@@ -321,3 +322,28 @@ class PhonepeAnalytics:
                 df1 = mys.get_data_from_mysql(query.format(state_selected=state_selected))
                 fig = px.line(df1, x="years", y="transaction_count", color="brands",markers=True)
                 st.plotly_chart(fig)           
+            elif question_selected.startswith("10."):
+                st.write("Users by States")          
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+                 
+                query = """select map_state as states, sum(registered_users) as registered_users
+                                from vw_map_users
+                                where years in ('{yr_selected}')
+                                group by map_state
+                                order by map_state;"""
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
+
+                fig = px.choropleth(
+                    pl_df,
+                    geojson=indian_states,
+                    featureidkey='properties.ST_NM',
+                    locations='states',
+                    color='registered_users',
+                    color_continuous_scale='Oranges'
+                )
+                fig.update_geos(fitbounds="locations", visible=True)
+
+                st.plotly_chart(fig)  

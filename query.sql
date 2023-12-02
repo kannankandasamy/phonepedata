@@ -152,7 +152,17 @@ select * from questions;
 
 delete from questions where question_name = '6. Aggregated Transactions by Years';
 
-insert into questions values (8, '8. Registered Users by Years');
+insert into questions values (10, '10. Registered users by states');
+
+update questions set question_name = '4. Transactions by Districts' where question_id = 4;
+
+update questions set question_name = '5. Registered Users by Districts' where question_id = 5;
+
+update questions set question_name = '6. Transactions and Users by districts' where question_id = 6;
+
+select * from vw_map_users;
+
+select * from questions;
 
 with cte as (
 	select map_state, years, transaction_name, sum(transaction_count) as transaction_count from vw_agg_trans
@@ -171,6 +181,24 @@ select
  group by 
  	map_state,
     transaction_name;
+    
+with cte as (
+	select map_state, years, brands, sum(transaction_count) as transaction_count from vw_agg_users
+	group by map_state, years, brands
+)
+select 
+	map_state,
+    brands,
+    sum(case years when '2018' then transaction_count end) as '2018',
+    sum(case years when '2019' then transaction_count end) as '2019', 
+    sum(case years when '2020' then transaction_count end) as '2020',
+    sum(case years when '2021' then transaction_count end) as '2021',
+    sum(case years when '2022' then transaction_count end) as '2022',
+    sum(case years when '2023' then transaction_count end) as '2023'
+ from cte
+ group by 
+ 	map_state,
+    brands;    
     
 select * from vw_top_users;
     
@@ -192,7 +220,8 @@ select
  	map_state,
     districts;    
 
-select * from vw_top_users;
+select * from vw_agg_users;
+select * from vw_top_trans;
 
 select s.map_state, a.* from agg_users a
     left join states s
