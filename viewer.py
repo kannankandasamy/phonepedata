@@ -74,8 +74,8 @@ class PhonepeAnalytics:
             st.write("Data product to get data from PhonePe using Python, load into mysql db")
             st.write("Data Sources - Population")
             st.write("https://statisticstimes.com/demographics/india/indian-states-population.php")
-            #image = Image.open('images/arch.drawio.png')
-            #st.image(image, caption="Architecture")            
+            image = Image.open('images/phonepe_arch.drawio.png')
+            st.image(image, caption="Architecture")            
         if selected == "About":
             st.title(f"About")                             
             st.write("This is Kannan Kandasamy")
