@@ -11,6 +11,11 @@ class DataLoader:
         df=pd.read_csv("C:/kannan/code/phonepedata/data/states/map_state.csv")
         return df
 
+    def get_population_by_states(self):
+        #https://statisticstimes.com/demographics/india/indian-states-population.php
+        df=pd.read_csv("C:/kannan/code/phonepedata/data/states/state_population.csv")
+        return df    
+
     def get_agg_trans(self):
         aggpath = "C:/kannan/code/phonepedata/data/aggregated/transaction/country/india/state/"
         agg_tran_list = os.listdir(aggpath)

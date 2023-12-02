@@ -80,9 +80,9 @@ show tables;
 
 select * from questions;
 
-truncate table questions;
+#truncate table questions;
 
-insert into questions values (2, '2. Aggregated Transactions by states');
+insert into questions values (11, '11. PerCapita Users by States');
 
 select distinct states from agg_trans;
 
@@ -113,10 +113,23 @@ create view vw_map_trans as
     join states s
     on a.states = s.existing_state;
 
-create view vw_map_users as
-	select s.map_state, a.* from map_users a
-    join states s
+create or replace view vw_map_users as
+	select s.map_state, s.population, a.* from map_users a
+    left join vw_states s
     on a.states = s.existing_state;
+
+select * from vw_states;    
+select map_state, sum(registered_users/population) from vw_map_users
+group by map_state;
+
+    
+create view vw_states as 
+	select s.*, p.population
+    from states s
+    join states_population p
+    on s.map_state = p.states;
+    
+select * from vw_states;    
 
 create view vw_top_trans as
 	select s.map_state, a.* from top_trans a
@@ -149,6 +162,12 @@ select * from vw_agg_trans;
 select distinct years from vw_agg_trans;
 
 select * from questions;
+
+select count(*) from states;
+select count(*) from states_population;
+select count(*) from states s
+join states_population p
+on s.map_state = p.states;
 
 delete from questions where question_name = '6. Aggregated Transactions by Years';
 

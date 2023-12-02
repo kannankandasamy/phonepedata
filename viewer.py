@@ -23,10 +23,16 @@ class PhonepeAnalytics:
         response =requests.get(url)
         indian_states = json.loads(response.content)        
 
+
+
         """
         df = dl.get_correct_states()
         op = wh.load_states_to_wh(mys, df)
         print(op)
+
+        df = dl.get_population_by_states()
+        op = wh.load_states_population_to_wh(mys, df)
+        print(op)      
 
         df = dl.get_agg_trans()
         op = wh.load_agg_trans_to_wh(mys, df)
@@ -65,6 +71,8 @@ class PhonepeAnalytics:
             st.title(f"PhonePe Data Analytics")  
         if selected == "Architecture":
             st.write("Data product to get data from PhonePe using Python, load into mysql db")
+            st.write("Data Sources - Population")
+            st.write("https://statisticstimes.com/demographics/india/indian-states-population.php")
             #image = Image.open('images/arch.drawio.png')
             #st.image(image, caption="Architecture")            
         if selected == "About":
@@ -80,7 +88,7 @@ class PhonepeAnalytics:
             st.title("PhonePe Data Analysis")
             query = """select question_id, question_name from questions order by question_id ;"""
             qn_df1 = mys.get_data_from_mysql(query)
-            question_selected = st.sidebar.selectbox("Select Question", options = qn_df1['question_name'])            
+            question_selected = st.sidebar.selectbox("Select Analysis", options = qn_df1['question_name'])            
 
             query = """select distinct years from agg_trans order by years;"""
             yr_df1 = mys.get_data_from_mysql(query)
@@ -118,15 +126,19 @@ class PhonepeAnalytics:
                 yr_selected="','".join(i for i in year_selected)
 
                 trans_selected = st.sidebar.multiselect("Select transaction types", options = trans_df['transaction_name'], default=list(trans_df['transaction_name'])[:])      
-                tr_selected="','".join(i for i in trans_selected)                       
+                tr_selected="','".join(i for i in trans_selected)       
+
+                op_selected = st.sidebar.selectbox("Report type", options = ['Transaction Count','Transaction Amount'])
+                if op_selected=='Transaction Count':
+                    option_details = 'transaction_count'
+                else:
+                    option_details = 'transaction_amount'                                
                  
-                query = """select s.map_state as states, sum(a.transaction_count) as transaction_count,  round(sum(a.transaction_amount), 2) as transaction_amount
-                                from agg_trans a
-                                join states s
-                                on a.states=s.existing_state
+                query = """select map_state as states, sum(transaction_count) as transaction_count,  round(sum(transaction_amount), 2) as transaction_amount
+                                from vw_agg_trans
                                 where years in ('{yr_selected}')
                                 and transaction_name in ('{trans_selected}')
-                                group by s.map_state;"""
+                                group by map_state;"""
                 pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,trans_selected=tr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
 
@@ -135,8 +147,8 @@ class PhonepeAnalytics:
                     geojson=indian_states,
                     featureidkey='properties.ST_NM',
                     locations='states',
-                    color='transaction_count',
-                    color_continuous_scale='Blues'
+                    color=option_details,
+                    color_continuous_scale='rainbow'
                 )
                 fig.update_geos(fitbounds="locations", visible=True)
 
@@ -327,13 +339,52 @@ class PhonepeAnalytics:
 
                 year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
                 yr_selected="','".join(i for i in year_selected)
+
+                op_selected = st.sidebar.selectbox("Report type", options = ['Registered Users','Application Usage'])
+                if op_selected=='Registered Users':
+                    option_details = 'registered_users'
+                else:
+                    option_details = 'app_opens'
                  
-                query = """select map_state as states, sum(registered_users) as registered_users
+                query = """select map_state as states, sum({option_details}) as '{op_selected}'
                                 from vw_map_users
                                 where years in ('{yr_selected}')
                                 group by map_state
                                 order by map_state;"""
-                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected, option_details=option_details, op_selected=op_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
+
+                #st.write("Registered users In map")
+                fig = px.choropleth(
+                    pl_df,
+                    geojson=indian_states,
+                    featureidkey='properties.ST_NM',
+                    locations='states',
+                    color=op_selected,
+                    color_continuous_scale='Oranges'
+                )
+                fig.update_geos(fitbounds="locations", visible=True)
+
+                st.plotly_chart(fig)  
+
+            elif question_selected.startswith("11."):
+                st.write("Per Capita Users by States")          
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+
+                op_selected = st.sidebar.selectbox("Report type", options = ['Registered Users','Application Usage'])
+                if op_selected=='Registered Users':
+                    option_details = 'registered_users'
+                else:
+                    option_details = 'app_opens'
+                 
+                query = """select map_state as states, sum({option_details}/population) as '{op_selected}'
+                                from vw_map_users
+                                where years in ('{yr_selected}')
+                                group by map_state
+                                order by map_state;"""
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected, option_details=option_details, op_selected=op_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
 
                 fig = px.choropleth(
@@ -341,9 +392,43 @@ class PhonepeAnalytics:
                     geojson=indian_states,
                     featureidkey='properties.ST_NM',
                     locations='states',
-                    color='registered_users',
-                    color_continuous_scale='Oranges'
+                    color=op_selected,
+                    color_continuous_scale='sunsetdark'
                 )
                 fig.update_geos(fitbounds="locations", visible=True)
 
-                st.plotly_chart(fig)  
+                st.plotly_chart(fig)                  
+            elif question_selected.startswith("12."):
+                st.write("PerCapita Transactions by States")          
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+
+                trans_selected = st.sidebar.multiselect("Select transaction types", options = trans_df['transaction_name'], default=list(trans_df['transaction_name'])[:])      
+                tr_selected="','".join(i for i in trans_selected)       
+
+                op_selected = st.sidebar.selectbox("Report type", options = ['Transaction Count','Transaction Amount'])
+                if op_selected=='Transaction Count':
+                    option_details = 'transaction_count'
+                else:
+                    option_details = 'transaction_amount'                                
+                 
+                query = """select map_state as states, sum(transaction_count/population) as transaction_count,  round(sum(transaction_amount/population), 2) as transaction_amount
+                                from vw_agg_trans
+                                where years in ('{yr_selected}')
+                                and transaction_name in ('{trans_selected}')
+                                group by map_state;"""
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,trans_selected=tr_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True, height=400)                        
+
+                fig = px.choropleth(
+                    pl_df,
+                    geojson=indian_states,
+                    featureidkey='properties.ST_NM',
+                    locations='states',
+                    color=option_details,
+                    color_continuous_scale='Reds'
+                )
+                fig.update_geos(fitbounds="locations", visible=True)
+
+                st.plotly_chart(fig)                      
