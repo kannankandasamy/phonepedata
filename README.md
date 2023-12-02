@@ -24,13 +24,13 @@ To execute this project we can use viewer.py as below:
   <img src="images/01_home.png" width="1000" title="Home page">
 </p>
 
-Loading channel information
+Analysis by States using Map
 
 <p align="center">
   <img src="images/02_analysis_map.png" width="1000" title="Analysis by Map">
 </p>
 
-Youtube Data Analysis
+Analysis by Users by Years
 
 <p align="center">
   <img src="images/03_analysis_users.png" width="1000" title="Analysis by Users by Years">
@@ -46,4 +46,4 @@ Kannan Kandasamy
  - Stackoverflow        https://stackoverflow.com/users/6466279/kannan-kandasamy
  - LinkedIn             https://www.linkedin.com/in/kannankandasamy/
  - Git                  https://github.com/kannankandasamy
- 
+
