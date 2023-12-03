@@ -163,7 +163,7 @@ class PhonepeAnalytics:
                     featureidkey='properties.ST_NM',
                     locations='states',
                     color=option_details,
-                    color_continuous_scale='rainbow'
+                    color_continuous_scale='speed'
                 )
                 fig.update_geos(fitbounds="locations", visible=True)
 
