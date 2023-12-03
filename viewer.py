@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 import plotly.express as px
+import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 import requests
 from PIL import Image
@@ -113,12 +114,25 @@ class PhonepeAnalytics:
                                 from vw_agg_trans 
                                 where years in ('{yr_selected}')
                                 and map_state in ('{sts_selected}')
-                                group by transaction_name;"""
+                                group by transaction_name
+                                order by transaction_count desc;"""
                 pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)    
 
-                fig1 = px.pie(pl_df, values="transaction_count", names="transaction_name", title="Transactions by types")
-                st.plotly_chart(fig1)
+                #fig1 = px.pie(pl_df, values="transaction_count", names="transaction_name", title="Transactions by types")
+                #st.plotly_chart(fig1)
+                fig = go.Figure(go.Bar(x=pl_df["transaction_name"],y=pl_df["transaction_count"],marker_color=pl_df["transaction_count"]))
+                fig.update_layout(
+                    updatemenus=[
+                        dict(direction="down", type="buttons",font={"color":"blue"},
+                            buttons=([
+                                dict(args=["type","bar"], label="bar view", method="restyle"),        
+                                dict(args=["type","pie"], label="pie view", method="restyle"),
+                                dict(args=["type","scatter"], label="scatter view", method="restyle"),
+                            ]))
+                    ]
+                )                            
+                st.plotly_chart(fig)
 
             elif question_selected.startswith("2."):
                 st.write("Aggregated Transactions by States")          
@@ -189,7 +203,7 @@ class PhonepeAnalytics:
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)     
 
-                fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts", title="In chart")
+                fig = px.bar(pl_df, x="districts", y="transaction_count", color="districts", title="In chart", labels={"transaction_count":"Transaction counts"})
                 st.plotly_chart(fig)
 
             elif question_selected.startswith("5."):
@@ -210,7 +224,19 @@ class PhonepeAnalytics:
                 pl_df = mys.get_data_from_mysql(query.format(state_selected=state_selected,yr_selected=yr_selected))
                 st.dataframe(pl_df,hide_index=True,use_container_width=True)     
 
-                fig = px.bar(pl_df, x="districts", y="registered_users", color="districts", title="In chart")
+                #fig = px.bar(pl_df, x="districts", y="registered_users", color="districts", title="In chart")
+
+                fig = go.Figure(go.Bar(x=pl_df["districts"],y=pl_df["registered_users"],marker_color=pl_df["registered_users"]))
+                fig.update_layout(
+                    updatemenus=[
+                        dict(direction="down", type="buttons",font={"color":"blue"},
+                            buttons=([
+                                dict(args=["type","bar"], label="bar view", method="restyle"),        
+                                dict(args=["type","pie"], label="pie view", method="restyle"),
+                                dict(args=["type","scatter"], label="scatter view", method="restyle"),
+                            ]))
+                    ]
+                )                    
                 st.plotly_chart(fig)
 
             elif question_selected.startswith("6."):
