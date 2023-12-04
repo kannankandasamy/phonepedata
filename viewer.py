@@ -459,3 +459,75 @@ class PhonepeAnalytics:
                 fig.update_geos(fitbounds="locations", visible=True)
 
                 st.plotly_chart(fig)                      
+            elif question_selected.startswith("13."):
+                st.write("Transactions - states comparison")
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+
+                state_selected = st.sidebar.multiselect("Select States", options = states_df['states'], default=list(states_df['states'])[0])      
+                sts_selected="','".join(i for i in state_selected)                
+
+                query = """select transaction_name, sum(transaction_count) as transaction_count,  round(sum(transaction_amount), 2) as transaction_amount
+                                from vw_agg_trans 
+                                where years in ('{yr_selected}')
+                                and map_state in ('{sts_selected}')
+                                group by transaction_name
+                                order by transaction_name;"""
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                query = """select map_state, transaction_name, sum(transaction_count) as transaction_count,  round(sum(transaction_amount), 2) as transaction_amount
+                                from vw_agg_trans 
+                                where years in ('{yr_selected}')
+                                and map_state in ('{sts_selected}')
+                                group by map_state,transaction_name
+                                order by map_state,transaction_name;"""
+                pl_df2 = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))                
+
+                fig1 = px.line(pl_df2, x="transaction_name", y="transaction_count", title="Transactions by types", color="map_state")
+                st.plotly_chart(fig1)
+                #fig = go.Figure(go.Bar(x=pl_df2["transaction_name"],y=pl_df2["transaction_count"],marker_color=pl_df2["transaction_count"]))
+                #fig.update_layout(
+                #    updatemenus=[
+                #        dict(direction="down", type="buttons",font={"color":"blue"},
+                #            buttons=([
+                #                dict(args=["type","bar"], label="bar view", method="restyle"),        
+                #                dict(args=["type","pie"], label="pie view", method="restyle"),
+                #                dict(args=["type","scatter"], label="scatter view", method="restyle"),
+                #            ]))
+                #    ]
+                #)                            
+                #st.plotly_chart(fig)        
+                # 
+            elif question_selected.startswith("14."):
+                st.write("PerCapita Transactions - states comparison by Amount")
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+
+                state_selected = st.sidebar.multiselect("Select States", options = states_df['states'], default=list(states_df['states'])[0])      
+                sts_selected="','".join(i for i in state_selected)                
+
+                query = """select transaction_name, sum(transaction_count/population) as transaction_count,  round(sum(transaction_amount/population), 2) as transaction_amount
+                                from vw_agg_trans 
+                                where years in ('{yr_selected}')
+                                and map_state in ('{sts_selected}')
+                                group by transaction_name
+                                order by transaction_name;"""
+                pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))
+                st.dataframe(pl_df,hide_index=True,use_container_width=True)    
+
+                query = """select map_state, transaction_name, sum(transaction_count/population) as transaction_count,  round(sum(transaction_amount/population), 2) as transaction_amount
+                                from vw_agg_trans 
+                                where years in ('{yr_selected}')
+                                and map_state in ('{sts_selected}')
+                                group by map_state,transaction_name
+                                order by map_state,transaction_name;"""
+                pl_df2 = mys.get_data_from_mysql(query.format(yr_selected=yr_selected,sts_selected=sts_selected))                
+
+                fig1 = px.line(pl_df2, x="transaction_name", y="transaction_amount", title="Transactions Amounts", color="map_state")
+                st.plotly_chart(fig1)                        
+
+                fig2 = px.line(pl_df2, x="transaction_name", y="transaction_count", title="Transactions Counts", color="map_state")
+                st.plotly_chart(fig2)   
