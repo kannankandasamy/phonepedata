@@ -60,6 +60,10 @@ class PhonepeAnalytics:
         df = dl.get_top_users()
         op = wh.load_top_users_to_wh(mys, df)
         print(op)    
+
+        df = dl.get_top_trans_pincodes()
+        op = wh.load_top_trans_pincodes_to_wh(mys, df)
+        print(op)            
         """
 
         with st.sidebar:
@@ -531,3 +535,43 @@ class PhonepeAnalytics:
 
                 fig2 = px.line(pl_df2, x="transaction_name", y="transaction_count", title="Transactions Counts", color="map_state")
                 st.plotly_chart(fig2)   
+            elif question_selected.startswith("15."):
+
+                year_selected = st.sidebar.multiselect("Select Year", options = yr_df1['years'], default=list(yr_df1['years'])[:])      
+                yr_selected="','".join(i for i in year_selected)
+
+                rep_type = st.sidebar.radio("States or Districts", ["States", "Districts", "Pincodes"], horizontal=True)
+
+                #state_selected = st.sidebar.multiselect("Select States", options = states_df['states'], default=list(states_df['states'])[0])      
+                #sts_selected="','".join(i for i in state_selected)                
+
+                if rep_type == "Districts":
+                    st.write("Top 10 Transactions in Districts")                    
+                    query = """select districts, map_state as state, round(sum(transaction_amount), 2) as transaction_amount
+                                    from vw_top_trans 
+                                    where years in ('{yr_selected}')
+                                    group by districts, map_state
+                                    order by transaction_amount desc
+                                    limit 10;"""
+                    pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
+                    st.dataframe(pl_df,hide_index=True,use_container_width=True) 
+                elif rep_type == "States":
+                    st.write("Top 10 Transactions in States")                    
+                    query = """select map_state as state, round(sum(transaction_amount), 2) as transaction_amount
+                                    from vw_top_trans 
+                                    where years in ('{yr_selected}')
+                                    group by map_state
+                                    order by transaction_amount desc
+                                    limit 10;;"""
+                    pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
+                    st.dataframe(pl_df,hide_index=True,use_container_width=True) 
+                elif rep_type == "Pincodes":
+                    st.write("Top 10 Transactions in Pincodes")                    
+                    query = """select cast(pincodes as char(10)) as pincode,map_state as state, round(sum(transaction_amount), 2) as transaction_amount
+                                    from vw_top_trans_pins 
+                                    where years in ('{yr_selected}')
+                                    group by cast(pincodes as char(10)),map_state
+                                    order by transaction_amount desc
+                                    limit 10;;"""
+                    pl_df = mys.get_data_from_mysql(query.format(yr_selected=yr_selected))
+                    st.dataframe(pl_df,hide_index=True,use_container_width=True) 

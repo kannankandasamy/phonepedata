@@ -121,4 +121,17 @@ class WHLoader:
         op = mys.load_data_to_mysql_alchemy(df = df, drop_table_query=drop_table_query, create_table_query=create_table_query, table_name="top_users")
         return op
 
-
+    def load_top_trans_pincodes_to_wh(self, mys, df):    
+        drop_table_query = "drop table if exists top_trans_pincodes"
+        create_table_query = """
+            create table if not exists top_trans_pincodes(
+                states varchar(500),
+                years varchar(20),
+                quarters varchar(10),
+                pincodes int,
+                transaction_count bigint,
+                transaction_amount float
+                )
+            """
+        op = mys.load_data_to_mysql_alchemy(df = df, drop_table_query=drop_table_query, create_table_query=create_table_query, table_name="top_trans_pincodes")
+        return op

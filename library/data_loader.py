@@ -164,7 +164,36 @@ class DataLoader:
                         top_tran_cols["years"].append(y)
                         top_tran_cols["quarters"].append(f.strip(".json"))
         df = pd.DataFrame(top_tran_cols)
-        return(df)                          
+        return(df)      
+
+    def get_top_trans_pincodes(self):
+        toppath = "C:/kannan/code/phonepedata/data/top/transaction/country/india/state/"
+        top_tran_list = os.listdir(toppath)
+        top_tran_cols = {"states":[],"years":[],"quarters":[],"pincodes":[],"transaction_count":[], "transaction_amount":[]}
+        for s in top_tran_list:
+            cur = toppath+s+"/"
+            yr_list = os.listdir(cur)
+
+            for y in yr_list:
+                cur_y = cur+y+"/"
+                file_list = os.listdir(cur_y)
+                for f in file_list:
+                    cur_f = cur_y+f
+                    data = open(cur_f,"r")
+
+                    json_data = json.load(data)
+                    for rec in json_data["data"]["pincodes"]:
+                        name = rec["entityName"]
+                        count = rec["metric"]["count"]
+                        amount = rec["metric"]["amount"]
+                        top_tran_cols["pincodes"].append(name)
+                        top_tran_cols["transaction_count"].append(count)
+                        top_tran_cols["transaction_amount"].append(amount)
+                        top_tran_cols["states"].append(s)
+                        top_tran_cols["years"].append(y)
+                        top_tran_cols["quarters"].append(f.strip(".json"))   
+        df = pd.DataFrame(top_tran_cols)
+        return(df)                                                   
 
     def get_top_users(self):
         top_user_path = "C:/kannan/code/phonepedata/data/top/user/country/india/state/"
